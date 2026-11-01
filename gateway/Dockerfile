@@ -7,7 +7,9 @@ RUN git init /opt/rea && git -C /opt/rea remote add origin https://github.com/ma
     && git -C /opt/rea fetch --depth 1 origin ${REA_COMMIT} \
     && git -C /opt/rea checkout --detach FETCH_HEAD
 WORKDIR /opt/rea
-RUN npm ci && npm run build:cached
+# The pinned source commit has package.json direct dependencies newer than its lockfile.
+# Reconcile the lockfile in the image, then run REA's normal artifact preparation.
+RUN npm install --include=dev --ignore-scripts && npm run build:cached
 WORKDIR /opt/rea-gateway
 COPY gateway/server.mjs ./server.mjs
 ENV REA_DIR=/opt/rea
